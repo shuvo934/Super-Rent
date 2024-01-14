@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.shuvo.rft.superrent">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <application
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:requestLegacyExternalStorage="true"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.SuperRent"
+        android:usesCleartextTraffic="true"
+        tools:targetApi="31">
+        <activity
+            android:name=".signup.SignUp"
+            android:exported="false"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name=".house_bill.house_bill_details.HouseBillCollection"
+            android:exported="false"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name=".house_bill.AddHouseBill"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".house_bill.HouseBill"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".property.property_details.rentAmnt.RentAmount"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".dashboard.Dashboard"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".property.property_details.PropertyDetailsModify"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".property.ProperrtyModify"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".property.PropertyInfo"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".renter.RenterModify"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".renter.RenterInfo"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <meta-data
+            android:name="preloaded_fonts"
+            android:resource="@array/preloaded_fonts" />
+    </application>
+
+</manifest>

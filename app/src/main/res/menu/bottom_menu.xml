@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/renter"
+        android:icon="@drawable/man_24"
+        android:title="RENTER" />
+
+    <item
+        android:id="@+id/property"
+        android:icon="@drawable/home_24"
+        android:title="PROPERTY" />
+
+    <item
+        android:id="@+id/house_bill"
+        android:icon="@drawable/money_24"
+        android:title="HOUSE BILL" />
+</menu>
