@@ -55,14 +55,14 @@ public class HouseBillCollection extends AppCompatActivity {
     TextView monthlyBillAmnt;
     TextView prvDueAmnt;
     TextView monthlyExtraBill;
-    TextView totalBill;
+    TextView totalBill, billCollected, billToCollect;
     TextInputLayout collectedAmntLay;
     TextInputEditText collectedAmnt;
     TextInputLayout collectDateLay;
     TextInputEditText collectDate;
     TextInputLayout notesLay;
     TextInputEditText notes;
-    Button save;
+    Button save, clearData;
     private Boolean conn = false;
     private Boolean connected = false;
     private int mYear, mMonth, mDay;
@@ -77,6 +77,7 @@ public class HouseBillCollection extends AppCompatActivity {
     String collected_amnt = "";
     String collected_date = "";
     String notes_by_user = "";
+    String bill_to_collect = "";
 
     String rhmbd_id = "";
     String rhmbd_rhmbm_id = "";
@@ -104,6 +105,8 @@ public class HouseBillCollection extends AppCompatActivity {
         prvDueAmnt = findViewById(R.id.previous_due_amnt_hb_collection);
         monthlyExtraBill = findViewById(R.id.monthly_extra_charge_hb_collection);
         totalBill = findViewById(R.id.total_bill_hb_collection);
+        billCollected = findViewById(R.id.collected_bill_hb_collection);
+        billToCollect = findViewById(R.id.bill_amount_to_collect_hb_collection);
 
         collectedAmntLay = findViewById(R.id.collected_amount_hb_collection_layout);
         collectedAmnt = findViewById(R.id.collected_amount_hb_collection);
@@ -115,6 +118,7 @@ public class HouseBillCollection extends AppCompatActivity {
         notes = findViewById(R.id.notes_hb_collection);
 
         save = findViewById(R.id.save_collected_amnt_button);
+        clearData = findViewById(R.id.clear_collected_amnt_button);
 
         user_code = userInfoLists.get(0).getUser_name();
 
@@ -150,8 +154,28 @@ public class HouseBillCollection extends AppCompatActivity {
         prvDueAmnt.setText(prv_due_amnt);
         monthlyExtraBill.setText(monthly_extra_bill);
         totalBill.setText(total_bill);
-        collectedAmnt.setText(collected_amnt);
         notes.setText(notes_by_user);
+        billCollected.setText(collected_amnt.isEmpty() ? "0" : collected_amnt);
+
+        int tot;
+        int colAmnt;
+        int billCollect;
+        try {
+            colAmnt = Integer.parseInt(collected_amnt);
+        }
+        catch (Exception e) {
+            colAmnt = 0;
+        }
+        try {
+            tot = Integer.parseInt(total_bill);
+        }
+        catch (Exception e) {
+            tot = 0;
+        }
+        billCollect = tot-colAmnt;
+        bill_to_collect = String.valueOf(billCollect);
+        collectedAmnt.setText(total_bill);
+        billToCollect.setText(bill_to_collect);
 
         Date t_date1 = Calendar.getInstance().getTime();
         SimpleDateFormat df1 = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault());
@@ -303,6 +327,28 @@ public class HouseBillCollection extends AppCompatActivity {
                 }
             }
         });
+        clearData.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(HouseBillCollection.this);
+                builder.setTitle("Clear Bill Data!")
+                        .setMessage("Do you want to clear all data for this bill?")
+                        .setPositiveButton("YES", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                clearAmount();
+                            }
+                        })
+                        .setNegativeButton("NO", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+
+                            }
+                        });
+                AlertDialog alert = builder.create();
+                alert.show();
+            }
+        });
     }
 
     public void saveAmount() {
@@ -423,6 +469,111 @@ public class HouseBillCollection extends AppCompatActivity {
             positive.setOnClickListener(v -> {
 
                 saveAmount();
+                dialog.dismiss();
+            });
+        }
+    }
+
+    public void clearAmount() {
+        fullLayout.setVisibility(View.GONE);
+        circularProgressIndicator.setVisibility(View.VISIBLE);
+
+        conn = false;
+        connected = false;
+        System.out.println("rhmbd_id: "+rhmbd_id);
+        String clearCollectionUrl = "http://119.18.148.32:8080/super/superrent_app/bill/billdtlCRUD/";
+        RequestQueue requestQueue = Volley.newRequestQueue(HouseBillCollection.this);
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, clearCollectionUrl, response -> {
+            conn = true;
+            System.out.println(response);
+            if (response.equals("200\n")) {
+                connected = true;
+                updateAfterClear();
+            }
+            else if (response.equals("100\n")) {
+                connected = false;
+                updateAfterClear();
+            }
+            else {
+                connected = false;
+                updateAfterClear();
+            }
+//            if (response.equals("200\n")) {
+//                connected = true;
+//                updateLay();
+//            }
+//            else if (response.equals("100\n")) {
+//                connected = false;
+//                updateLay();
+//            }
+//            else {
+//                connected = false;
+//                updateLay();
+//            }
+        }, error -> {
+            error.printStackTrace();
+            conn = false;
+            connected = false;
+            updateAfterClear();
+        }){
+            @Nullable
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String, String> params = new HashMap<>();
+                params.put("P_RHMBD_ID",rhmbd_id);
+
+                params.put("P_OPERATION_TYPE","3");
+                params.put("P_USER_NAME",user_code);
+                return params;
+            }
+        };
+
+        requestQueue.add(stringRequest);
+    }
+
+    private void updateAfterClear() {
+        fullLayout.setVisibility(View.VISIBLE);
+        circularProgressIndicator.setVisibility(View.GONE);
+
+        if(conn) {
+            if (connected) {
+                AlertDialog dialog = new AlertDialog.Builder(HouseBillCollection.this)
+                        .setMessage("Bill Data Cleared")
+                        .setPositiveButton("OK", null)
+                        .show();
+
+                dialog.setCancelable(false);
+                dialog.setCanceledOnTouchOutside(false);
+                Button positive = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+                positive.setOnClickListener(v -> {
+                    finish();
+                    dialog.dismiss();
+                });
+            }
+            else {
+                AlertDialog dialog = new AlertDialog.Builder(HouseBillCollection.this)
+                        .setMessage("Failed to Clear Bill Collection. Please try again.")
+                        .setPositiveButton("Retry", null)
+                        .show();
+
+                Button positive = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+                positive.setOnClickListener(v -> {
+
+                    clearAmount();
+                    dialog.dismiss();
+                });
+            }
+        }
+        else {
+            AlertDialog dialog = new AlertDialog.Builder(HouseBillCollection.this)
+                    .setMessage("Slow Internet or Please Check Your Internet Connection")
+                    .setPositiveButton("Retry", null)
+                    .show();
+
+            Button positive = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+            positive.setOnClickListener(v -> {
+
+                clearAmount();
                 dialog.dismiss();
             });
         }

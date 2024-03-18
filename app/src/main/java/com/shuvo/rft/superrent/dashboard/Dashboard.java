@@ -41,8 +41,10 @@ import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.shuvo.rft.superrent.MainActivity;
 import com.shuvo.rft.superrent.R;
 import com.shuvo.rft.superrent.dashboard.adapters.FiveCollectionAdapters;
+import com.shuvo.rft.superrent.dashboard.adapters.MonthlyDueAdapter;
 import com.shuvo.rft.superrent.dashboard.arraylists.ChartValue;
 import com.shuvo.rft.superrent.dashboard.arraylists.FiveCollectLists;
+import com.shuvo.rft.superrent.dashboard.arraylists.MonthlyDueList;
 import com.shuvo.rft.superrent.house_bill.HouseBill;
 import com.shuvo.rft.superrent.property.PropertyInfo;
 import com.shuvo.rft.superrent.renter.RenterInfo;
@@ -98,6 +100,12 @@ public class Dashboard extends AppCompatActivity {
     TextView fiveCollDataNotFound;
     ArrayList<FiveCollectLists> fiveCollectLists;
 
+    RecyclerView monthlyDueView;
+    RecyclerView.LayoutManager mdLayoutManager;
+    MonthlyDueAdapter monthlyDueAdapter;
+    TextView monthlyDueNotFound;
+    ArrayList<MonthlyDueList> monthlyDueLists;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -123,6 +131,14 @@ public class Dashboard extends AppCompatActivity {
         fiveCollectionView.setHasFixedSize(true);
         layoutManager = new LinearLayoutManager(getApplicationContext());
         fiveCollectionView.setLayoutManager(layoutManager);
+
+        monthlyDueView = findViewById(R.id.current_month_due_list_view);
+        monthlyDueNotFound = findViewById(R.id.no_due_amnt_data_msg);
+        monthlyDueNotFound.setVisibility(View.GONE);
+
+        monthlyDueView.setHasFixedSize(true);
+        mdLayoutManager = new LinearLayoutManager(getApplicationContext());
+        monthlyDueView.setLayoutManager(mdLayoutManager);
 
         user_name = userInfoLists.get(0).getUser_name().toUpperCase();
         user_code = userInfoLists.get(0).getUser_name();
@@ -271,7 +287,8 @@ public class Dashboard extends AppCompatActivity {
         connected = false;
         chartValues = new ArrayList<>();
         fiveCollectLists = new ArrayList<>();
-//        http://119.18.148.32:8080/super/superrent_app/analytics/duerenterlist/
+        monthlyDueLists = new ArrayList<>();
+
         String totPropertyUrl = "http://119.18.148.32:8080/super/superrent_app/analytics/totalproperty/"+user_code+"";
         String totFlatUrl = "http://119.18.148.32:8080/super/superrent_app/analytics/totalflat/"+user_code+"";
         String totRenterUrl = "http://119.18.148.32:8080/super/superrent_app/analytics/activerenter/"+user_code+"";
@@ -280,8 +297,45 @@ public class Dashboard extends AppCompatActivity {
         String totColldueAmntUrl = "http://119.18.148.32:8080/super/superrent_app/analytics/currentmonthdue/"+user_code+"";
         String collectionGrowthUrl = "http://119.18.148.32:8080/super/superrent_app/analytics/collectionGrowth?USER_NAME="+user_code+"&RHMBM_RPM_ID=";
         String fiveCollUrl = "http://119.18.148.32:8080/super/superrent_app/analytics/lastfewcollection/"+user_code+"";
+        String monthDueUrl = "http://119.18.148.32:8080/super/superrent_app/analytics/duerenterlist/"+user_code+"";
 
         RequestQueue requestQueue = Volley.newRequestQueue(Dashboard.this);
+
+        StringRequest monthDueReq = new StringRequest(Request.Method.GET, monthDueUrl, response -> {
+            conn = true;
+            try {
+                JSONObject jsonObject = new JSONObject(response);
+                String items = jsonObject.getString("items");
+                String count = jsonObject.getString("count");
+                if (!count.equals("0")) {
+                    JSONArray array = new JSONArray(items);
+                    for (int i = 0; i < array.length(); i++) {
+                        JSONObject info = array.getJSONObject(i);
+
+                        String due_renter_name = info.getString("due_renter_name")
+                                .equals("null") ? "" : info.getString("due_renter_name");
+                        String due_amt = info.getString("due_amt")
+                                .equals("null") ? "" : info.getString("due_amt");
+                        String prop_dtl = info.getString("prop_dtl")
+                                .equals("null") ? "0" : info.getString("prop_dtl");
+
+                        monthlyDueLists.add(new MonthlyDueList(due_renter_name,prop_dtl,due_amt));
+                    }
+                }
+                connected = true;
+                updateLayout();
+            }
+            catch (JSONException e) {
+                connected = false;
+                e.printStackTrace();
+                updateLayout();
+            }
+        }, error -> {
+            conn = false;
+            connected = false;
+            error.printStackTrace();
+            updateLayout();
+        });
 
         StringRequest fiveCollReq = new StringRequest(Request.Method.GET, fiveCollUrl, response -> {
             conn = true;
@@ -306,8 +360,7 @@ public class Dashboard extends AppCompatActivity {
                         fiveCollectLists.add(new FiveCollectLists(due_renter_name,rhmbd_bill_collect_date,rhmbd_collected_amt,sl));
                     }
                 }
-                connected = true;
-                updateLayout();
+                requestQueue.add(monthDueReq);
             }
             catch (JSONException e) {
                 connected = false;
@@ -596,6 +649,15 @@ public class Dashboard extends AppCompatActivity {
                 }
                 fiveCollectionAdapters = new FiveCollectionAdapters(fiveCollectLists,Dashboard.this);
                 fiveCollectionView.setAdapter(fiveCollectionAdapters);
+
+                if (monthlyDueLists.size() == 0) {
+                    monthlyDueNotFound.setVisibility(View.VISIBLE);
+                }
+                else {
+                    monthlyDueNotFound.setVisibility(View.GONE);
+                }
+                monthlyDueAdapter = new MonthlyDueAdapter(monthlyDueLists, Dashboard.this);
+                monthlyDueView.setAdapter(monthlyDueAdapter);
             }
             else {
                 AlertDialog dialog = new AlertDialog.Builder(Dashboard.this)

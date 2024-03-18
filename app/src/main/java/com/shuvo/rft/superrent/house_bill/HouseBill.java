@@ -205,15 +205,15 @@ public class HouseBill extends AppCompatActivity {
                         String rhmbd_ryms_id = detailsInfo.getString("rhmbd_ryms_id")
                                 .equals("null") ? "" : detailsInfo.getString("rhmbd_ryms_id");
                         String rhmbd_monthly_bill_amt = detailsInfo.getString("rhmbd_monthly_bill_amt")
-                                .equals("null") ? "" : detailsInfo.getString("rhmbd_monthly_bill_amt");
+                                .equals("null") ? "0" : detailsInfo.getString("rhmbd_monthly_bill_amt");
                         String rhmbd_due_amt = detailsInfo.getString("rhmbd_due_amt")
-                                .equals("null") ? "" : detailsInfo.getString("rhmbd_due_amt");
+                                .equals("null") ? "0" : detailsInfo.getString("rhmbd_due_amt");
                         String rhmbd_monthly_extra_charge = detailsInfo.getString("rhmbd_monthly_extra_charge")
-                                .equals("null") ? "" : detailsInfo.getString("rhmbd_monthly_extra_charge");
+                                .equals("null") ? "0" : detailsInfo.getString("rhmbd_monthly_extra_charge");
                         String rhmbd_total_bill_amt = detailsInfo.getString("rhmbd_total_bill_amt")
-                                .equals("null") ? "" :  detailsInfo.getString("rhmbd_total_bill_amt");
+                                .equals("null") ? "0" :  detailsInfo.getString("rhmbd_total_bill_amt");
                         String rhmbd_collected_amt = detailsInfo.getString("rhmbd_collected_amt")
-                                .equals("null") ? "" : detailsInfo.getString("rhmbd_collected_amt");
+                                .equals("null") ? "0" : detailsInfo.getString("rhmbd_collected_amt");
                         String rhmbd_bill_date = detailsInfo.getString("rhmbd_bill_date")
                                 .equals("null") ? "" : detailsInfo.getString("rhmbd_bill_date");
                         String rhmbd_bill_collect_date = detailsInfo.getString("rhmbd_bill_collect_date")

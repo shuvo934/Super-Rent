@@ -43,7 +43,7 @@ public class FiveCollectionAdapters extends RecyclerView.Adapter<FiveCollectionA
         return mCategoryItem.size();
     }
 
-    public class FCHOlder extends RecyclerView.ViewHolder {
+    public static class FCHOlder extends RecyclerView.ViewHolder {
 
         public TextView renterName;
         public TextView collDate;
